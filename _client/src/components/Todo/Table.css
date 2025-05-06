@@ -1,0 +1,129 @@
+.table-container {
+  width: 100%;
+  height: 80%;
+  padding: 15px 20px;
+  margin-top: 12px;
+  border-radius: 18px;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  background-color: white;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+th,
+td {
+  padding: 10px;
+  border-bottom: 1px solid #888;
+  text-align: left;
+  vertical-align: middle;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+
+th {
+  background-color: #6892db;
+  font-weight: bold;
+}
+
+/* Column Widths */
+.task {
+  width: 19%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.desc {
+  width: 40%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.date {
+  width: 13%;
+  text-align: center;
+}
+
+.time {
+  width: 8%;
+  text-align: center;
+}
+
+.actions {
+  width: 15%;
+  text-align: center;
+}
+
+/* Button Styling */
+.btn-r,
+.btn-b {
+  cursor: pointer;
+  padding: 8px 14px;
+  font-size: 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.5);
+  transition: background 0.2s ease-in-out;
+}
+
+.btn-b {
+  color: blue;
+  margin-right: 5px;
+}
+
+.btn-r {
+  color: red;
+}
+
+.btn-b:hover {
+  background-color: lightblue;
+}
+
+.btn-r:hover {
+  background-color: rgba(240, 128, 128, 0.5);
+}
+
+/* No Tasks Message */
+.empty-text {
+  text-align: center;
+  font-weight: bold;
+  padding: 15px;
+}
+.completed-task {
+  text-decoration: line-through;
+  color: rgb(92, 92, 92);
+  opacity: 0.6;
+}
+.tooltip-container {
+  position: relative;
+  cursor: pointer;
+}
+
+.tooltip {
+  position: absolute;
+  background-color: black;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  white-space: nowrap;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.tooltip-container:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+}

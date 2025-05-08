@@ -7,40 +7,39 @@ function InputCom({
   value,
   placeholder,
   onChange,
-  errors,
-  isPasswordField,
-  isConfirmPassword,
+  errors = {},
+  isPassword = false,
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
+  const inputType =
+    isPassword && !showPassword ? "password" : isPassword ? "text" : type;
+
   return (
-    <div className="field password-field">
-     
-     <div className="input-div">
-     
-      <input
-        type={
-          isPasswordField || isConfirmPassword
-            ? showPassword
-              ? "text"
-              : "password"
-            : type
-        }
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-      />
-      {(isPasswordField || isConfirmPassword) && (
-        <span onClick={() => setShowPassword(!showPassword)}>
-          {showPassword ? <FaEye /> : <FaEyeSlash />}
-        </span>
-      )}
-     </div> 
+    <div className="field">
+      <div className="input-div">
+        <input
+          type={inputType}
+          name={name}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          autoComplete="off"
+          className={`input-field ${errors[name] ? "input-error" : ""}`}
+        />
+        {isPassword && (
+          <span
+            className="toggle-password"
+            onClick={() => setShowPassword(!showPassword)}
+            style={{ cursor: "pointer", marginLeft: "8px" }}
+          >
+            {showPassword ? <FaEye /> : <FaEyeSlash />}
+          </span>
+        )}
+      </div>
       {errors[name] && <p className="error">{errors[name]}</p>}
     </div>
   );
 }
 
 export default InputCom;
-

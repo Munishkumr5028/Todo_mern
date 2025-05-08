@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Todo.css";
 import Table from "./Table";
 import Message from "./Message";
 import { Modal, Box, Typography, TextField, Button } from "@mui/material";
 import Inputbox from "./Inputbox";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const style = {
   position: "absolute",
@@ -22,62 +23,65 @@ const style = {
 
 function Todo() {
   const navigate = useNavigate();
-  const loggedInUser = sessionStorage.getItem("loggedInUser");
-
-  const storedTasks = JSON.parse(localStorage.getItem("todos")) || [];
-  const userTasks = storedTasks.filter((task) => task.email === loggedInUser);
-
-  const [tasks, setTasks] = useState(userTasks);
+  const [tasks, setTasks] = useState([]);
   const [open, setOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [filterDate, setFilterDate] = useState("");
   const [appliedFilter, setAppliedFilter] = useState("");
 
-  const saveTasksToStorage = (updatedTasks) => {
-    const newTaskList = [
-      ...storedTasks.filter((task) => task.email !== loggedInUser),
-      ...updatedTasks,
-    ];
-    localStorage.setItem("todos", JSON.stringify(newTaskList));
-    setTasks(updatedTasks);
-  };
+  // ✅ Fetch all todos when component loads
+  useEffect(() => {
+    axios
+      .get("http://localhost:4000/api/todos")
+      .then((response) => {
+        setTasks(response.data); // ✅ No filtering by email
+      })
+      .catch((error) => console.error("Error fetching tasks:", error));
+  }, []);
 
   const handleOpen = () => {
     setEditingTask(null);
     setOpen(true);
   };
+
   const handleClose = () => setOpen(false);
   const handleFilterOpen = () => setFilterOpen(true);
   const handleFilterClose = () => setFilterOpen(false);
 
   const handleSaveTask = (taskData) => {
-    const updatedTask = { ...taskData, email: loggedInUser, completed: false };
-    const updatedTasks =
-      editingTask !== null
-        ? tasks.map((task, index) =>
-            index === editingTask ? updatedTask : task
-          )
-        : [updatedTask, ...tasks];
+    const newTask = { ...taskData };
 
-    saveTasksToStorage(updatedTasks);
-    handleClose();
+    axios
+      .post("http://localhost:4000/api/todos", newTask)
+      .then((response) => {
+        setTasks([response.data, ...tasks]);
+        handleClose();
+      })
+      .catch((error) => console.error("Error adding task:", error));
   };
 
-  const handleDeleteTask = (index) => {
-    saveTasksToStorage(tasks.filter((_, i) => i !== index));
+  const handleDeleteTask = (id) => {
+    axios
+      .delete(`http://localhost:4000/api/todos/${id}`)
+      .then(() => {
+        setTasks(tasks.filter((task) => task._id !== id));
+      })
+      .catch((error) => console.error("Error deleting task:", error));
   };
 
-  const handleEditTask = (index) => {
-    setEditingTask(index);
-    setOpen(true);
-  };
-
-  const handleToggleComplete = (index) => {
-    const updatedTasks = tasks.map((task, i) =>
-      i === index ? { ...task, completed: !task.completed } : task
-    );
-    saveTasksToStorage(updatedTasks);
+  const handleToggleComplete = (id) => {
+    const task = tasks.find((task) => task._id === id);
+    const updatedTask = { ...task, completed: !task.completed };
+    axios
+      .put(`http://localhost:4000/api/todos/${id}`, updatedTask)
+      .then((response) => {
+        const updatedTasks = tasks.map((task) =>
+          task._id === id ? response.data : task
+        );
+        setTasks(updatedTasks);
+      })
+      .catch((error) => console.error("Error toggling task completion:", error));
   };
 
   const applyFilter = () => {
@@ -96,7 +100,7 @@ function Todo() {
   };
 
   const filteredTasks = appliedFilter
-    ? tasks.filter((task) => task.date === appliedFilter)
+    ? tasks.filter((task) => task.eventDate === appliedFilter)
     : tasks;
 
   return (
@@ -123,25 +127,23 @@ function Todo() {
           <Table
             tasks={filteredTasks}
             onDelete={handleDeleteTask}
-            onEdit={handleEditTask}
             onToggleComplete={handleToggleComplete}
           />
         </div>
       </div>
 
+      {/* Add Task Modal */}
       <Modal open={open} onClose={handleClose}>
         <Box sx={style}>
-          <Typography variant="h6">
-            {editingTask !== null ? "Edit Task" : "Add a New Task"}
-          </Typography>
+          <Typography variant="h6">Add a New Task</Typography>
           <Inputbox
             handleClose={handleClose}
             handleSave={handleSaveTask}
-            taskToEdit={tasks[editingTask]}
           />
         </Box>
       </Modal>
 
+      {/* Filter Modal */}
       <Modal open={filterOpen} onClose={handleFilterClose}>
         <Box sx={style}>
           <Typography variant="h6">Filter Tasks by Date</Typography>

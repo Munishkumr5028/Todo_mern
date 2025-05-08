@@ -55,7 +55,6 @@ input {
   color: #555;
 }
 
-
 .login-button {
   width: 100%;
   padding: 10px;
@@ -65,7 +64,7 @@ input {
   border-radius: 5px;
   cursor: pointer;
 }
-button.facebook-btn{
+button.facebook-btn {
   width: 100%;
   padding: 10px;
   background-color: #0a3a6d;
@@ -74,7 +73,7 @@ button.facebook-btn{
   border-radius: 5px;
   cursor: pointer;
 }
-button.Google-btn{
+button.Google-btn {
   width: 100%;
   padding: 10px;
   background-color: #ada7a7;
@@ -172,19 +171,19 @@ h1 {
 .logout-button:hover {
   background-color: #cc0000;
 }
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: sans-serif;
 }
-.page{
+.page {
   display: flex;
   position: absolute;
   bottom: 16px;
   right: 60px;
 }
-.header-color{
+.header-color {
   color: black;
 }
 button.logout-btn {
@@ -197,7 +196,38 @@ button.logout-btn {
   cursor: pointer;
   transition: 0.3s ease-out;
 }
-button.logout-btn:hover{
-  background-color : rgb(201, 54, 54);
+button.logout-btn:hover {
+  background-color: rgb(201, 54, 54);
   color: white;
+}
+.field {
+  margin-bottom: 1rem;
+}
+
+.input-div {
+  display: flex;
+  align-items: center;
+}
+
+.input-field {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.input-error {
+  border-color: red;
+}
+
+.error {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+span.toggle-password {
+  cursor: pointer;
+  margin-left: 8px;
+  position: absolute;
+  right: 10px;
 }

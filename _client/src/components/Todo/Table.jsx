@@ -2,35 +2,36 @@ import React, { useState, useEffect } from "react";
 import "./table.css";
 import CustomPagination from "./Pagination";
 
-function Table({ tasks, onEdit, onDelete, onToggleComplete }) {
+function Table({ tasks, onDelete, onToggleComplete }) {
   const [currentPage, setCurrentPage] = useState(1);
   const tasksPerPage = 4;
-  const [hoveredTaskIndex, setHoveredTaskIndex] = useState(null);
+  const [hoveredTaskId, setHoveredTaskId] = useState(null);
   const [countdown, setCountdown] = useState("");
 
   const indexOfLastTask = currentPage * tasksPerPage;
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
   const currentTasks = tasks.slice(indexOfFirstTask, indexOfLastTask);
 
+  // Countdown timer logic
   useEffect(() => {
     let countdownInterval;
 
-    if (hoveredTaskIndex !== null) {
+    if (hoveredTaskId !== null) {
       countdownInterval = setInterval(() => {
-        const task = tasks[hoveredTaskIndex];
-        if (!task || !task.date || !task.time) {
+        const task = tasks.find((t) => t._id === hoveredTaskId);
+        if (!task || !task.eventDate || !task.eventTime) {
           setCountdown("Invalid time");
           return;
         }
 
-        const taskTime = new Date(`${task.date}T${task.time}`);
+        const taskTime = new Date(`${task.eventDate}T${task.eventTime}`);
         const now = new Date();
         const diff = taskTime - now;
 
         if (diff > 0) {
           const hours = Math.floor(diff / (1000 * 60 * 60));
           const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          setCountdown(`${hours}h ${minutes}m `);
+          setCountdown(`${hours}h ${minutes}m`);
         } else {
           setCountdown("Time expired");
         }
@@ -38,7 +39,7 @@ function Table({ tasks, onEdit, onDelete, onToggleComplete }) {
     }
 
     return () => clearInterval(countdownInterval);
-  }, [hoveredTaskIndex, tasks]);
+  }, [hoveredTaskId, tasks]);
 
   return (
     <div className="table-container">
@@ -58,34 +59,39 @@ function Table({ tasks, onEdit, onDelete, onToggleComplete }) {
               <td colSpan="5" className="empty-text">No tasks added</td>
             </tr>
           ) : (
-            currentTasks.map((task, index) => (
+            currentTasks.map((task) => (
               <tr
-                key={index}
-                onClick={() => onToggleComplete(index)}
+                key={task._id}
+                onClick={() => onToggleComplete(task._id)}
                 className={task.completed ? "completed-task" : ""}
               >
                 <td className="task">{task.task}</td>
                 <td className="desc">{task.description}</td>
-                <td className="date">{task.date}</td>
+                <td className="date">{task.eventDate}</td>
                 <td
                   className="time tooltip-container"
-                  onMouseEnter={() => setHoveredTaskIndex(index)}
+                  onMouseEnter={() => setHoveredTaskId(task._id)}
                   onMouseLeave={() => {
-                    setHoveredTaskIndex(null);
+                    setHoveredTaskId(null);
                     setCountdown("");
                   }}
                 >
-                  {task.time}
-                  {hoveredTaskIndex === index && (
+                  {task.eventTime}
+                  {hoveredTaskId === task._id && (
                     <span className="tooltip">{countdown || "Calculating..."}</span>
                   )}
                 </td>
-
                 <td className="actions">
-                  <button className="btn-b" onClick={(e) => { e.stopPropagation(); onEdit(index); }}>
+                <button className="btn-b" onClick={(e) => { e.stopPropagation(); onEdit(index); }}>
                     &#9998;
                   </button>
-                  <button className="btn-r" onClick={(e) => { e.stopPropagation(); onDelete(index); }}>
+                  <button
+                    className="btn-r"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(task._id);
+                    }}
+                  >
                     &#128465;
                   </button>
                 </td>
@@ -94,14 +100,15 @@ function Table({ tasks, onEdit, onDelete, onToggleComplete }) {
           )}
         </tbody>
       </table>
-      <span className="page-stick">
+
+      <div className="page-stick">
         <CustomPagination
           tasksPerPage={tasksPerPage}
           totalTasks={tasks.length}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
         />
-      </span>
+      </div>
     </div>
   );
 }

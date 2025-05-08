@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 import "../App.css";
 import InputCom from "./InputCom";
 
 function Signup() {
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -18,73 +20,61 @@ function Signup() {
   const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&])[A-Za-z\d@.#$!%*?&]{8,15}$/;
 
-  const { email, password, confirmPassword } = formData;
-
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const generateUserId = () => {
-    let users = JSON.parse(localStorage.getItem("users")) || [];
+  const validate = () => {
+    const { name, email, password, confirmPassword } = formData;
+    const newErrors = {};
 
-    // Extract existing user IDs
-    let existingIds = users
-      .map((user) => parseInt(user.id.replace("AA", ""), 10))
-      .sort((a, b) => a - b);
+    if (!name.trim()) newErrors.name = "Name is required";
+    if (!email.trim()) newErrors.email = "Email is required";
+    else if (!emailRegex.test(email.trim()))
+      newErrors.email = "Invalid email format";
 
-    // Find the first missing ID
-    let newId = 1;
-    for (let i = 0; i < existingIds.length; i++) {
-      if (existingIds[i] !== newId) break;
-      newId++;
-    }
+    if (!password) newErrors.password = "Password is required";
+    else if (!passwordRegex.test(password))
+      newErrors.password =
+        "Password must be 8-15 chars with uppercase, number & special char";
 
-    return `AA${newId}`;
+    if (!confirmPassword)
+      newErrors.confirmPassword = "Confirm Password is required";
+    else if (password !== confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match";
+
+    return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    let validationErrors = {};
+    const validationErrors = validate();
 
-    if (!email) {
-      validationErrors.email = "Email is required";
-    } else if (!emailRegex.test(email)) {
-      validationErrors.email = "Invalid email format";
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
     }
 
-    if (!password) {
-      validationErrors.password = "Password is required";
-    } else if (!passwordRegex.test(password)) {
-      validationErrors.password =
-        "Password must be 8-15 characters, with 1 uppercase, 1 number, and 1 special character";
-    }
+    try {
+      const { name, email, password, confirmPassword } = formData;
 
-    if (!confirmPassword) {
-      validationErrors.confirmPassword = "Confirm Password is required";
-    } else if (password !== confirmPassword) {
-      validationErrors.confirmPassword = "Passwords do not match";
-    }
+      const res = await axios.post("http://localhost:4000/api/auth/signup", {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        confirmPassword,
+      });
 
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length === 0) {
-      let users = JSON.parse(localStorage.getItem("users")) || [];
-
-      const userExists = users.some((user) => user.email === email);
-      if (userExists) {
-        alert("User with this email already exists! Try logging in.");
-        return;
+      if (res.status === 200 || res.status === 201) {
+        alert("Signup successful!");
+        navigate("/");
       }
-
-      const userId = generateUserId();
-
-      users.push({ id: userId, email, password });
-
-      localStorage.setItem("users", JSON.stringify(users));
-
-      alert(`Signup successful!`);
-      navigate("/");
+    } catch (error) {
+      const msg =
+        error.response?.data?.message || "Signup failed. Please try again.";
+      alert(msg);
     }
   };
 
@@ -95,10 +85,18 @@ function Signup() {
           <h2 className="header-color">Signup</h2>
           <form onSubmit={handleSubmit}>
             <InputCom
+              type="text"
+              name="name"
+              placeholder="Full Name"
+              value={formData.name}
+              onChange={handleChange}
+              errors={errors}
+            />
+            <InputCom
               type="email"
               name="email"
               placeholder="Email"
-              value={email}
+              value={formData.email}
               onChange={handleChange}
               errors={errors}
             />
@@ -106,7 +104,7 @@ function Signup() {
               type="password"
               name="password"
               placeholder="Password"
-              value={password}
+              value={formData.password}
               onChange={handleChange}
               errors={errors}
             />
@@ -114,10 +112,10 @@ function Signup() {
               type="password"
               name="confirmPassword"
               placeholder="Confirm Password"
-              value={confirmPassword}
+              value={formData.confirmPassword}
               onChange={handleChange}
               errors={errors}
-              isConfirmPassword={true}
+              isPassword={true}
             />
             <button type="submit" className="login-button">
               Signup
@@ -126,19 +124,17 @@ function Signup() {
               Already have an account? <Link to="/">Login</Link>
             </p>
           </form>
+
           <div className="divider">or</div>
+
           <div className="social-buttons">
             <button className="facebook-btn">
-              <span>
-                <FaFacebook className="text-blue-700" />
-              </span>
-              Login with Facebook
+              <FaFacebook className="text-blue-700" />
+              <span>Login with Facebook</span>
             </button>
             <button className="Google-btn">
-              <span>
-                <FaGoogle className="text-red-600" />
-              </span>
-              Login with Google
+              <FaGoogle className="text-red-600" />
+              <span>Login with Google</span>
             </button>
           </div>
         </div>

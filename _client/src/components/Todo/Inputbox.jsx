@@ -5,8 +5,8 @@ function Inputbox({ handleClose, handleSave, taskToEdit }) {
   const [formData, setFormData] = useState({
     task: "",
     description: "",
-    date: "",
-    time: "",
+    eventDate: "",
+    eventTime: "",
   });
 
   useEffect(() => {
@@ -35,7 +35,7 @@ function Inputbox({ handleClose, handleSave, taskToEdit }) {
       return;
     }
 
-    if (formData.date < today) {
+    if (formData.eventDate < today) {
       alert("You cannot add a task for a past date.");
       return;
     }
@@ -69,8 +69,8 @@ function Inputbox({ handleClose, handleSave, taskToEdit }) {
         <div className="filed">
           <input
             type="date"
-            name="date"
-            value={formData.date}
+            name="eventDate"
+            value={formData.eventDate}
             onChange={handleChange}
             required
           />
@@ -78,8 +78,8 @@ function Inputbox({ handleClose, handleSave, taskToEdit }) {
         <div className="filed">
           <input
             type="time"
-            name="time"
-            value={formData.time}
+            name="eventTime"
+            value={formData.eventTime}
             onChange={handleChange}
             required
           />

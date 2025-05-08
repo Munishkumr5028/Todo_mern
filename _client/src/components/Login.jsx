@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
+import axios from "axios";
 import "../App.css";
 import InputCom from "./InputCom";
 
@@ -13,37 +14,44 @@ function Login() {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  const { email, password } = formData;
-
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleSubmit = (e) => {
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    if (!formData.password.trim()) newErrors.password = "Password is required";
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    let validationErrors = {};
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    const user = users.find((user) => user.email === email);
-
-    if (!email) {
-      validationErrors.email = "Email is required";
-    } else if (!user) {
-      validationErrors.email = "Email not found";
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
     }
 
-    if (!password) {
-      validationErrors.password = "Password is required";
-    } else if (!user || user.password !== password) {
-      validationErrors.password = "Incorrect password";
-    }
+    try {
+      const res = await axios.post("http://localhost:4000/api/auth/login", {
+        email: formData.email.trim(),
+        password: formData.password.trim(),
+      });
 
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length === 0) {
-      sessionStorage.setItem("loggedInUser", user.email);
-      navigate("/todo");
+      // Assuming response contains user data
+      if (res.status === 200 || res.status === 201) {
+        sessionStorage.setItem("loggedInUser", res.data.email);
+        alert("Login successful!");
+        navigate("/todo");
+      }
+    } catch (error) {
+      const msg =
+        error.response?.data?.message || "Login failed. Please try again.";
+      setErrors({ general: msg });
     }
   };
 
@@ -53,11 +61,13 @@ function Login() {
         <div className="form-content">
           <h2 className="header-color">Login</h2>
           <form onSubmit={handleSubmit}>
+            {errors.general && <p className="error-text">{errors.general}</p>}
+
             <InputCom
               type="email"
               name="email"
               placeholder="Email"
-              value={email}
+              value={formData.email}
               onChange={handleChange}
               errors={errors}
             />
@@ -66,10 +76,10 @@ function Login() {
               type="password"
               name="password"
               placeholder="Password"
-              value={password}
+              value={formData.password}
               onChange={handleChange}
               errors={errors}
-              isPasswordField={true}
+              isPassword={true}
             />
 
             <button type="submit" className="login-button">
@@ -79,19 +89,17 @@ function Login() {
               Don't have an account? <Link to="/signup">Signup</Link>
             </p>
           </form>
+
           <div className="divider">or</div>
+
           <div className="social-buttons">
             <button className="facebook-btn">
-              <span>
-                <FaFacebook className="text-blue-700" />
-              </span>
-              Login with Facebook
+              <FaFacebook className="text-blue-700" />
+              <span>Login with Facebook</span>
             </button>
             <button className="Google-btn">
-              <span>
-                <FaGoogle className="text-red-600 " />
-              </span>
-              Login with Google
+              <FaGoogle className="text-red-600" />
+              <span>Login with Google</span>
             </button>
           </div>
         </div>

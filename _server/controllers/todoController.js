@@ -3,16 +3,16 @@ const Todo = require("../models/todoModels");
 // Create a new todo
 exports.createTodo = async (req, res) => {
   try {
-    const { title, description, eventDate, eventTime } = req.body;
+    const { task, description, eventDate, eventTime } = req.body;
     const newTodo = await Todo.create({
-      title,
+      task,
       description,
       eventDate,
       eventTime,
     });
     res.status(201).json(newTodo);
   } catch (err) {
-    res.status(500).json({ error: "Filed to create todo" });
+    res.status(500).json({ error: "Failed to create todo" });
   }
 };
 

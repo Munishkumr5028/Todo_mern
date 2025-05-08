@@ -113,6 +113,15 @@ button.Google-btn {
 .social-buttons button {
   width: 100%;
   margin-top: 5px;
+  position: relative;
+}
+svg.text-blue-700 {
+  position: absolute;
+  right: 30px;
+}
+svg.text-red-600 {
+  position: absolute;
+  right: 30px;
 }
 
 .facebook-btn {

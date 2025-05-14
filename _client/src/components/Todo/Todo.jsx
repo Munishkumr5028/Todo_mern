@@ -61,27 +61,31 @@ function Todo() {
   };
 
   const handleUpdateTask = (updatedData) => {
-    // ✅ Update existing task on backend
-    axios
-      .put(`http://localhost:4000/api/todos/${updatedData._id}`, updatedData)
-      .then((response) => {
-        setTasks((prev) =>
-          prev.map((task) =>
-            task._id === updatedData._id ? response.data : task
-          )
-        );
-        setEditingTask(null); // ✅ clear editing state
-        handleClose();
-      })
-      .catch((error) => console.error("Error updating task:", error));
-  };
+  axios
+    .put(`http://localhost:4000/api/todos/${updatedData._id}`, updatedData)
+    .then((response) => {
+      setTasks((prev) =>
+        prev.map((task) =>
+          task._id === updatedData._id ? response.data : task
+        )
+      );
+      setEditingTask(null);
+      handleClose();
+    })
+    .catch((error) => console.error("Error updating task:", error));
+};
+
 
   const handleEditTask = (task) => {
-    // ✅ Triggered when Edit button is clicked
-    setEditingTask(task);
-    setOpen(true);
+    // ✅ GET latest task data by ID from backend
+    axios
+      .get(`http://localhost:4000/api/todos/${task._id}`)
+      .then((response) => {
+        setEditingTask(response.data); // ✅ Set the latest task in state
+        setOpen(true); // ✅ Open the modal
+      })
+      .catch((error) => console.error("Error fetching task for edit:", error));
   };
-
   const handleDeleteTask = (id) => {
     axios
       .delete(`http://localhost:4000/api/todos/${id}`)
@@ -102,7 +106,9 @@ function Todo() {
         );
         setTasks(updatedTasks);
       })
-      .catch((error) => console.error("Error toggling task completion:", error));
+      .catch((error) =>
+        console.error("Error toggling task completion:", error)
+      );
   };
 
   const applyFilter = () => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Inputbox.css";
 
-function Inputbox({ handleClose, handleSave, taskToEdit }) {
+function Inputbox({ handleClose, handleSave, editingTask }) {
   const [formData, setFormData] = useState({
     task: "",
     description: "",
@@ -10,10 +10,10 @@ function Inputbox({ handleClose, handleSave, taskToEdit }) {
   });
 
   useEffect(() => {
-    if (taskToEdit) {
-      setFormData({ ...taskToEdit }); // ✅ Prevent mutation by cloning
+    if (editingTask) {
+      setFormData({ ...editingTask }); // ✅ clone to avoid mutation
     }
-  }, [taskToEdit]);
+  }, [editingTask]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,7 +40,7 @@ function Inputbox({ handleClose, handleSave, taskToEdit }) {
       return;
     }
 
-    handleSave(formData);
+    handleSave(formData); // This goes to handleUpdateTask or handleSaveTask
   };
 
   return (
@@ -86,7 +86,7 @@ function Inputbox({ handleClose, handleSave, taskToEdit }) {
         </div>
         <div className="button-box">
           <button className="btn-blue" type="submit">
-            {taskToEdit ? "Update" : "Save"}
+            {editingTask ? "Update" : "Save"}
           </button>
           <button className="btn-blue" type="button" onClick={handleClose}>
             Cancel

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./table.css";
 import CustomPagination from "./Pagination";
 
-function Table({ tasks, onDelete, onToggleComplete }) {
+function Table({ tasks, onDelete, onToggleComplete, onEdit }) { // ✅ Added onEdit prop
   const [currentPage, setCurrentPage] = useState(1);
   const tasksPerPage = 4;
   const [hoveredTaskId, setHoveredTaskId] = useState(null);
@@ -82,7 +82,13 @@ function Table({ tasks, onDelete, onToggleComplete }) {
                   )}
                 </td>
                 <td className="actions">
-                <button className="btn-b" onClick={(e) => { e.stopPropagation(); onEdit(index); }}>
+                  <button
+                    className="btn-b"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(task); // ✅ Changed from onEdit(index) to onEdit(task)
+                    }}
+                  >
                     &#9998;
                   </button>
                   <button

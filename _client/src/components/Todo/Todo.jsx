@@ -26,22 +26,21 @@ function Todo() {
   const [tasks, setTasks] = useState([]);
   const [open, setOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
+  const [editingTask, setEditingTask] = useState(null); // ✅ for editing
   const [filterDate, setFilterDate] = useState("");
   const [appliedFilter, setAppliedFilter] = useState("");
 
-  // ✅ Fetch all todos when component loads
   useEffect(() => {
     axios
       .get("http://localhost:4000/api/todos")
       .then((response) => {
-        setTasks(response.data); // ✅ No filtering by email
+        setTasks(response.data);
       })
       .catch((error) => console.error("Error fetching tasks:", error));
   }, []);
 
   const handleOpen = () => {
-    setEditingTask(null);
+    setEditingTask(null); // ✅ ensure we’re not editing
     setOpen(true);
   };
 
@@ -59,6 +58,28 @@ function Todo() {
         handleClose();
       })
       .catch((error) => console.error("Error adding task:", error));
+  };
+
+  const handleUpdateTask = (updatedData) => {
+    // ✅ Update existing task on backend
+    axios
+      .put(`http://localhost:4000/api/todos/${updatedData._id}`, updatedData)
+      .then((response) => {
+        setTasks((prev) =>
+          prev.map((task) =>
+            task._id === updatedData._id ? response.data : task
+          )
+        );
+        setEditingTask(null); // ✅ clear editing state
+        handleClose();
+      })
+      .catch((error) => console.error("Error updating task:", error));
+  };
+
+  const handleEditTask = (task) => {
+    // ✅ Triggered when Edit button is clicked
+    setEditingTask(task);
+    setOpen(true);
   };
 
   const handleDeleteTask = (id) => {
@@ -128,17 +149,21 @@ function Todo() {
             tasks={filteredTasks}
             onDelete={handleDeleteTask}
             onToggleComplete={handleToggleComplete}
+            onEdit={handleEditTask} // ✅ NEW PROP
           />
         </div>
       </div>
 
-      {/* Add Task Modal */}
+      {/* Add/Edit Modal */}
       <Modal open={open} onClose={handleClose}>
         <Box sx={style}>
-          <Typography variant="h6">Add a New Task</Typography>
+          <Typography variant="h6">
+            {editingTask ? "Edit Task" : "Add a New Task"}
+          </Typography>
           <Inputbox
             handleClose={handleClose}
-            handleSave={handleSaveTask}
+            handleSave={editingTask ? handleUpdateTask : handleSaveTask} // ✅ Add/Edit mode
+            editingTask={editingTask} // ✅ NEW PROP
           />
         </Box>
       </Modal>

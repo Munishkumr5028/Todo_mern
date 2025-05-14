@@ -11,7 +11,7 @@ function Inputbox({ handleClose, handleSave, taskToEdit }) {
 
   useEffect(() => {
     if (taskToEdit) {
-      setFormData(taskToEdit);
+      setFormData({ ...taskToEdit }); // ✅ Prevent mutation by cloning
     }
   }, [taskToEdit]);
 
@@ -35,7 +35,7 @@ function Inputbox({ handleClose, handleSave, taskToEdit }) {
       return;
     }
 
-    if (formData.eventDate < today) {
+    if (formData.eventDate.trim() < today) {
       alert("You cannot add a task for a past date.");
       return;
     }
@@ -51,7 +51,7 @@ function Inputbox({ handleClose, handleSave, taskToEdit }) {
             type="text"
             name="task"
             placeholder="Name of the Task"
-            value={formData.task}
+            value={formData.task || ""}
             onChange={handleChange}
             required
           />
@@ -61,7 +61,7 @@ function Inputbox({ handleClose, handleSave, taskToEdit }) {
             type="text"
             name="description"
             placeholder="A short description of the task"
-            value={formData.description}
+            value={formData.description || ""}
             onChange={handleChange}
             required
           />
@@ -70,7 +70,7 @@ function Inputbox({ handleClose, handleSave, taskToEdit }) {
           <input
             type="date"
             name="eventDate"
-            value={formData.eventDate}
+            value={formData.eventDate || ""}
             onChange={handleChange}
             required
           />
@@ -79,7 +79,7 @@ function Inputbox({ handleClose, handleSave, taskToEdit }) {
           <input
             type="time"
             name="eventTime"
-            value={formData.eventTime}
+            value={formData.eventTime || ""}
             onChange={handleChange}
             required
           />
